@@ -1,14 +1,19 @@
 import React from 'react';
+import {connect} from 'react-redux';
 
-import Dashboard from './Dashboard';
-import {Link} from 'react-router';
+import AppHeader from '../components/AppHeader.jsx';
 
-export default function App({children}) {
+export default function App({children, tweetCount}) {
   return (
       <div>
-        <h1><Link to="/">Dashboard</Link></h1>
-        <h1><Link to="/settings">Settings</Link></h1>
-            {children}
+          <AppHeader tweetCount={ tweetCount } />
+          {children}
       </div>
   );
 }
+
+const mapStateToProps = state => ({
+    tweetCount: state.view.tweetCount,
+});
+
+export default connect(mapStateToProps)(App);
