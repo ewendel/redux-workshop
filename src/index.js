@@ -8,6 +8,7 @@ import { newTweet } from './actions';
 import Router from './Router';
 import DevTools from './containers/DevTools';
 
+
 const store = configureStore();
 
 const ws = new WebSocket('ws://twitterws.herokuapp.com');
