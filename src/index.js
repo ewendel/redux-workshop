@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import configureStore from './configureStore';
 import { newTweet } from './actions';
 
-import Router from './router';
+import Router from './Router';
 import DevTools from './containers/DevTools';
 
 

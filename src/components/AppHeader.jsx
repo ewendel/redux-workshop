@@ -8,7 +8,7 @@ export default function AppHeader({ tweetCount }) {
     <div className="app-header">
         <div className="menu-bar">
             <Link to="/" className="img img-icon img-icon-dashboard"/>
-            <Link to="/settings" className="img img-icon img-icon-settings"/>
+            <Link to="/feed" className="img img-icon img-icon-settings"/>
         </div>
       <h1 className="heading">Twitterizer</h1>
       <div>
