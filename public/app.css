@@ -162,6 +162,30 @@ body {
 
 .countrylist .flag-icon { margin: 0px 5px; }
 
+.filterList {
+  position: absolute;
+  top: 300px;
+  left: 100px;
+  background: white;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  border-bottom-color: gray;
+}
+
+.filterList li {
+  list-style: none;
+  cursor: pointer;
+}
+
+.filterList li:hover {
+  background: aliceblue;
+}
+
+.filterList .inactive {
+  text-decoration: line-through;
+}
+
 .img {
 	background-size: 100% 100%;
 	background-repeat: no-repeat;

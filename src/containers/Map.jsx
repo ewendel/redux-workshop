@@ -1,12 +1,13 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 
-import { selectTweet } from '../actions';
+import { selectTweet, setFilterActive } from '../actions';
 
 import TweetMap from '../components/TweetMap';
 import CountryList from '../components/CountryList';
 import CurrentTweet from '../components/CurrentTweet';
 import InfluentialTweets from '../components/InfluentialTweets';
+import FilterList from '../components/FilterList';
 
 class Map extends React.Component {
   constructor(props) {
@@ -25,11 +26,14 @@ class Map extends React.Component {
       currentTweet,
       tweets,
       countries,
-      filters
+      filters,
+      dispatch
     } = this.props;
     const tweet = currentTweet !== null ?
       <CurrentTweet tweet={ currentTweet } /> :
       null;
+
+    const activeFilters = filters.filter(f => f.isActive);
 
     return (
       <div>
@@ -37,10 +41,14 @@ class Map extends React.Component {
           tweets={ tweets }
           currentTweet={ currentTweet }
           showTweet={ this.showTweet }
-          filters={ filters }
+          filters={ activeFilters }
         />
         <InfluentialTweets tweets={ tweets } />
         <CountryList countries={ countries } />
+        <FilterList
+          filters={ filters }
+          onFilterActiveChange={ (f, active) => dispatch(setFilterActive(f, active)) }
+        />
         { tweet }
       </div>
     );
@@ -52,7 +60,7 @@ Map.propTypes = {
   tweetCount: PropTypes.number,
   currentTweet: PropTypes.object,
   countries: PropTypes.object,
-  filters: PropTypes.array,
+  filters: PropTypes.array.isRequired,
   dispatch: PropTypes.func.isRequired
 };
 
@@ -60,7 +68,10 @@ const mapStateToProps = state => ({
   tweets: state.tweets,
   currentTweet: state.view.currentTweet,
   countries: state.countries,
-  filters: state.filters
+  filters: state.filters.map(f => ({
+    ...f,
+    isActive: state.view.activeFilterIdsMap[f.id]
+  }))
 });
 
 export default connect(mapStateToProps)(Map);

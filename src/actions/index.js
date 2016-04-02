@@ -73,6 +73,7 @@ export function deleteFilter(filter) {
 export function setFilterActive(filter, active) {
   return {
     type: FILTER_ACTIVE_CHANGED,
+    filter,
     active
   };
 }
