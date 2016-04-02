@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import { selectTweet } from '../actions';
 
 import TweetMap from '../components/TweetMap';
-import AppHeader from '../components/AppHeader';
 import CountryList from '../components/CountryList';
 import CurrentTweet from '../components/CurrentTweet';
 import InfluentialTweets from '../components/InfluentialTweets';
@@ -22,7 +21,12 @@ class Map extends React.Component {
   }
 
   render() {
-    const { currentTweet, tweets, tweetCount, countries } = this.props;
+    const {
+      currentTweet,
+      tweets,
+      countries,
+      filters
+    } = this.props;
     const tweet = currentTweet !== null ?
       <CurrentTweet tweet={ currentTweet } /> :
       null;
@@ -33,6 +37,7 @@ class Map extends React.Component {
           tweets={ tweets }
           currentTweet={ currentTweet }
           showTweet={ this.showTweet }
+          filters={ filters }
         />
         <InfluentialTweets tweets={ tweets } />
         <CountryList countries={ countries } />
@@ -47,14 +52,15 @@ Map.propTypes = {
   tweetCount: PropTypes.number,
   currentTweet: PropTypes.object,
   countries: PropTypes.object,
+  filters: PropTypes.array,
   dispatch: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
   tweets: state.tweets,
-  tweetCount: state.view.tweetCount,
   currentTweet: state.view.currentTweet,
-  countries: state.countries
+  countries: state.countries,
+  filters: state.filters
 });
 
 export default connect(mapStateToProps)(Map);
