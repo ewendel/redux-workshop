@@ -29,24 +29,24 @@ function noCache(req, res, next) {
 app.use('/api', noCache, jsonServer.router(__dirname + '/db.json'));
 app.use(express.static('dist'));
 app.use(express.static('public'));
-
-app.use(function(err, req, res, next){
-    console.error(err.stack);
-    next(err);
+// Send index.html for all other routes
+app.use(function(req, res) {
+  res.sendFile(__dirname + '/public/index.html');
 });
 
 app.use(function(err, req, res, next) {
-    util.inspect(err);
-    res.status(500).send({ error: err.message });
+  util.inspect(err);
+  console.error(err.stack);
+  res.status(500).send({ error: err.message });
 });
 
 var server = http.createServer(app);
 
 server.listen(port, function() {
-    console.log("Server started on port " + port);
+  console.log("Server started on port " + port);
 });
 
 if (fs.existsSync(twitterConfigFile)) {
-    var twitterConfig = require(twitterConfigFile);
-    require('./twitter-ws')(server, twitterConfig);
+  var twitterConfig = require(twitterConfigFile);
+  require('./twitter-ws')(server, twitterConfig);
 }
