@@ -4,6 +4,9 @@ export const TWEET_RECEIVED = 'TWEET_RECEIVED';
 export const TWEET_SELECTED = 'TWEET_SELECTED';
 export const TWEET_SAVED = 'TWEET_SAVED';
 export const SAVED_TWEETS_FETCH = 'SAVED_TWEETS_FETCH';
+export const FILTER_ADDED = 'FILTER_ADDED';
+export const FILTER_DELETED = 'FILTER_DELETED';
+export const FILTER_ACTIVE_CHANGED = 'FILTER_ACTIVE_CHANGED';
 
 export function newTweet(tweet) {
   return {
@@ -53,3 +56,23 @@ export function fetchSavedTweets() {
   };
 }
 
+export function addFilter(filter) {
+  return {
+    type: FILTER_ADDED,
+    filter
+  };
+}
+
+export function deleteFilter(filter) {
+  return {
+    type: FILTER_DELETED,
+    filter
+  };
+}
+
+export function setFilterActive(filter, active) {
+  return {
+    type: FILTER_ACTIVE_CHANGED,
+    active
+  };
+}
