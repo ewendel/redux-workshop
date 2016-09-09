@@ -1,41 +1,36 @@
 module Main exposing (..)
 
 import Html exposing (div, text)
-import Html.Attributes exposing (class)
 import Html.App as Html
-import Mouse
+import Model exposing (Tweet, exampleTweet)
+import View
 
 
 type alias Model =
-    Int
+    Tweet
 
 
 type Msg
-    = MouseClick Mouse.Position
+    = NoOp
 
 
 init : ( Model, Cmd a )
 init =
-    ( 1, Cmd.none )
+    ( exampleTweet, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        MouseClick _ ->
-            ( model + 1, Cmd.none )
+    ( model, Cmd.none )
 
 
 view : Model -> Html.Html Msg
 view model =
-    div
-        [ class "yellow-counter" ]
-        [ text (toString model) ]
-
+    View.tweet model
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Mouse.clicks MouseClick
+    Sub.none
 
 
 main : Program Never
