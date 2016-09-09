@@ -19,13 +19,14 @@ module.exports = {
   ],
   module: {
     loaders: [{
-      test: /\.jsx?$/,
-      loader: 'babel',
-      exclude: /node_modules/,
+      test: /\.elm$/,
+      loader: 'elm-hot!elm-webpack',
+      exclude: [/node_modules/, /elm-stuff/],
       include: __dirname
-    }]
+    }],
+    noParse: /\.elm$/
   },
   resolve: {
-    extensions: ['', '.js', '.jsx']
+    extensions: ['', '.js', '.elm']
   }
 };
