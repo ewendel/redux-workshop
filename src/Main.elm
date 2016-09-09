@@ -2,35 +2,51 @@ module Main exposing (..)
 
 import Html exposing (div, text)
 import Html.App as Html
-import Model exposing (Tweet, exampleTweet)
+import WebSocket
+import Json.Decode as Json
+import Model exposing (Tweet, decodeTweet, exampleTweet)
 import View
 
 
 type alias Model =
-    Tweet
+    Maybe Tweet
 
 
 type Msg
-    = NoOp
+    = NewTweet String
 
 
 init : ( Model, Cmd a )
 init =
-    ( exampleTweet, Cmd.none )
+    ( Nothing, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        NewTweet tweetStr ->
+            let
+                tweet =
+                    tweetStr
+                        |> Json.decodeString decodeTweet
+                        |> Result.toMaybe
+            in
+                ( tweet, Cmd.none )
 
 
 view : Model -> Html.Html Msg
 view model =
-    View.tweet model
+    case model of
+        Just tweet ->
+            View.tweet tweet
+
+        Nothing ->
+            div [] []
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    WebSocket.listen "ws://twitterws.herokuapp.com" NewTweet
 
 
 main : Program Never
