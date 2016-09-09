@@ -1,7 +1,9 @@
 module Main exposing (..)
 
 import Html exposing (div, text)
+import Html.Attributes exposing (class)
 import Html.App as Html
+import Mouse
 
 
 type alias Model =
@@ -9,7 +11,7 @@ type alias Model =
 
 
 type Msg
-    = NoOp
+    = MouseClick Mouse.Position
 
 
 init : ( Model, Cmd a )
@@ -19,12 +21,21 @@ init =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        MouseClick _ ->
+            ( model + 1, Cmd.none )
 
 
 view : Model -> Html.Html Msg
 view model =
-    div [] [ text (toString model) ]
+    div
+        [ class "yellow-counter" ]
+        [ text (toString model) ]
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Mouse.clicks MouseClick
 
 
 main : Program Never
@@ -33,5 +44,5 @@ main =
         { init = init
         , update = update
         , view = view
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = subscriptions
         }
