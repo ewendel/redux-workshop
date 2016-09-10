@@ -1,6 +1,6 @@
-module View exposing (tweet)
+module View exposing (tweet, tweetList)
 
-import Html exposing (div, img, span, strong, text)
+import Html exposing (div, img, span, strong, text, ul, li)
 import Html.Attributes exposing (class, src)
 import Model exposing (Tweet)
 
@@ -33,3 +33,15 @@ tweet model =
                 [ text model.place.name ]
             ]
         ]
+
+
+tweetList : List Tweet -> Html.Html a
+tweetList tweets =
+    let
+        tweetListItems =
+            tweets
+                |> List.map (\t -> li [] [ tweet t ] )
+    in
+        ul [ class "tweetlist" ]
+            tweetListItems
+

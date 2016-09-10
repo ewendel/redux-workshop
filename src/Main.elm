@@ -8,8 +8,12 @@ import Model exposing (Tweet, decodeTweet, exampleTweet)
 import View
 
 
+maxTweets : Int
+maxTweets = 100
+
+
 type alias Model =
-    Maybe Tweet
+    List Tweet
 
 
 type Msg
@@ -18,7 +22,7 @@ type Msg
 
 init : ( Model, Cmd a )
 init =
-    ( Nothing, Cmd.none )
+    ( [], Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -26,23 +30,21 @@ update msg model =
     case msg of
         NewTweet tweetStr ->
             let
-                tweet =
+                tweetMb =
                     tweetStr
                         |> Json.decodeString decodeTweet
                         |> Result.toMaybe
-            in
-                ( tweet, Cmd.none )
+                tweets =
+                    case tweetMb of
+                        Just t -> t :: model
 
+                        Nothing -> model
+            in
+                ( tweets |> List.take maxTweets, Cmd.none )
 
 view : Model -> Html.Html Msg
 view model =
-    case model of
-        Just tweet ->
-            View.tweet tweet
-
-        Nothing ->
-            div [] []
-
+  View.tweetList model
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
