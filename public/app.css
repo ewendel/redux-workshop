@@ -29,6 +29,14 @@ body {
   background-color: mintcream;
 }
 
+html, body {
+  height: 100%;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
 
 .tweet-map > div {
     height: 100vh;

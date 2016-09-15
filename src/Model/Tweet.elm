@@ -6,11 +6,12 @@ module Model.Tweet
         , TweetUser
         , exampleTweet
         , jsonDecodeTweetString
+        , toMarker
         )
 
 import Json.Decode
 import Json.Decode.Pipeline
-
+import GMaps exposing (Marker)
 
 type alias Tweet =
     { id : Int
@@ -45,6 +46,17 @@ type alias TweetUser =
     , lang : String
     , profile_image_url_https : String
     }
+
+
+toMarker : Tweet -> Marker
+toMarker tweet =
+  let
+    lat = tweet.geo.coordinates |> List.head |> Maybe.withDefault 0
+    lng = tweet.geo.coordinates |> List.drop 1 |> List.head |> Maybe.withDefault 0
+  in
+      { id = tweet.id
+      , pos = { lat = lat, lng = lng }
+      }
 
 
 jsonDecodeTweetString : String -> Result String Tweet

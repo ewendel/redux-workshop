@@ -9,7 +9,8 @@ module Update
 import WebSocket
 import Model exposing (Model, maxTweets)
 import Model.Route exposing (Route(..), routeToString)
-import Model.Tweet exposing (Tweet, jsonDecodeTweetString)
+import Model.Tweet exposing (Tweet, jsonDecodeTweetString, toMarker)
+import GMaps exposing (showMap, hideMap, showMarkers)
 
 
 init : ( Model, Cmd Msg )
@@ -17,7 +18,7 @@ init =
     ( { tweets = []
       , route = Main
       }
-    , Cmd.none
+    , showMap ()
     )
 
 
@@ -31,45 +32,56 @@ type Msg
     | RouteChanged Route
 
 
-updateTweets : Msg -> List Tweet -> List Tweet
-updateTweets msg tweets =
-    case msg of
-        NewTweet tweetStr ->
-            let
-                tweetMb =
-                    tweetStr
-                        |> jsonDecodeTweetString
-                        |> Result.toMaybe
+updateTweets : String -> Model -> ( Model, Cmd Msg )
+updateTweets tweetStr model =
+    let
+        tweetMb =
+            tweetStr
+                |> jsonDecodeTweetString
+                |> Result.toMaybe
 
-                tweets =
-                    case tweetMb of
-                        Just t ->
-                            t :: tweets
+        tweets =
+            case tweetMb of
+                Just t ->
+                    t :: model.tweets
 
-                        Nothing ->
-                            tweets
-            in
-                tweets |> List.take maxTweets
+                Nothing ->
+                    model.tweets
 
-        _ ->
+        newTweets =
             tweets
+                |> List.take maxTweets
+
+        tweetMarkers =
+            newTweets
+                |> List.map toMarker
+    in
+        ( { model
+            | tweets = newTweets
+          }
+        , showMarkers tweetMarkers
+        )
 
 
-updateRoute : Msg -> Route -> Route
-updateRoute msg route =
-    case msg of
-        RouteChanged r ->
-            r
+updateRoute : Route -> Model -> ( Model, Cmd Msg )
+updateRoute r model =
+    case r of
+        Main ->
+            ( { model | route = r }
+            , showMap ()
+            )
 
-        _ ->
-            route
+        Feed ->
+            ( { model | route = r }
+            , hideMap ()
+            )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( { model
-        | tweets = updateTweets msg model.tweets
-        , route = updateRoute msg model.route
-      }
-    , Cmd.none
-    )
+    case msg of
+        RouteChanged r ->
+            updateRoute r model
+
+        NewTweet t ->
+            updateTweets t model
