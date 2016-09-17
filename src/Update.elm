@@ -12,6 +12,7 @@ import Model.Route exposing (Route(..), routeToString)
 import Model.Tweet exposing (Tweet, TweetId, jsonDecodeTweetString, toMarker)
 import Model.GMaps exposing (Marker, IconUrl)
 import Model.MarkerColor as MarkerColor exposing (Color, defaultColor, toIconUrl)
+import Model.Filter exposing (Filter)
 import GMaps exposing (showMap, hideMap, showMarkers, changeMarkerIcon, markerClicked)
 import Util
 
@@ -21,6 +22,14 @@ init =
     ( { tweets = []
       , route = Main
       , currentTweet = Nothing
+      , filters =
+            [ { color = MarkerColor.Yellow
+              , filterName = "Trump"
+              , text = "trump"
+              , hashtags = [ "trump" ]
+              , active = True
+              }
+            ]
       }
     , showMap ()
     )
@@ -38,6 +47,7 @@ type Msg
     = NewTweet String
     | RouteChanged Route
     | MarkerClicked TweetId
+    | ToggleFilterActive Filter
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -51,6 +61,9 @@ update msg model =
 
         MarkerClicked m ->
             setCurrentTweet m model
+
+        ToggleFilterActive f ->
+            toggleFilterActive f model
 
 
 updateRoute : Route -> Model -> ( Model, Cmd Msg )
@@ -159,3 +172,21 @@ getColorChangeCmd oldModel newModel =
                         [ changeMarkerIcon ( t1.id, toIconUrl defaultColor )
                         , changeMarkerIcon ( t2.id, toIconUrl MarkerColor.Blue )
                         ]
+
+
+toggleFilterActive : Filter -> Model -> ( Model, Cmd Msg )
+toggleFilterActive filter model =
+    let
+        updatedFilters =
+            model.filters
+                |> List.map
+                    (\f ->
+                        if f == filter then
+                            { f | active = not f.active }
+                        else
+                            f
+                    )
+    in
+        ( { model | filters = updatedFilters }
+        , Cmd.none
+        )

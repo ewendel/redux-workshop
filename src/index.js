@@ -29,7 +29,9 @@ app.ports.changeMarkerIcon.subscribe(([id, iconUrl]) => {
 
 app.ports.showMarkers.subscribe(newMarkers => {
   newMarkers.forEach(([m, iconUrl]) => {
-    if (markers.has(m.id)) {
+    const existingMarker = markers.get(m.id);
+    if (existingMarker) {
+      existingMarker.setIcon(iconUrl);
       return;
     }
     const marker = new google.maps.Marker({

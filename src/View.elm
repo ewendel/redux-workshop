@@ -6,8 +6,10 @@ import Html.Events exposing (onClick)
 import Model exposing (Model)
 import Model.Tweet exposing (Tweet)
 import Model.Route as Route exposing (Route, routeToString)
-import Model.MarkerColor exposing (Color)
+import Model.Filter exposing (Filter)
+import Model.MarkerColor exposing (colorToString)
 import Update exposing (Msg)
+import Util
 
 
 app : Model -> Html.Html Msg
@@ -45,12 +47,10 @@ viewMain : Model -> Html.Html Msg
 viewMain model =
     let
         children =
-            case model.currentTweet of
-                Just ct ->
-                    [ currentTweet ct ]
-
-                Nothing ->
-                    []
+            [ Maybe.map currentTweet model.currentTweet
+            , Just <| filterList model.filters
+            ]
+                |> Util.collect
     in
         div []
             children
@@ -124,3 +124,26 @@ link route =
             , onClick (Update.RouteChanged route)
             ]
             []
+
+
+filterList : List Filter -> Html.Html Msg
+filterList filters =
+    div [ class "filter-container" ]
+        [ ul [ class "filterList" ]
+            (List.map (\f -> li [] [ filter f ]) filters)
+        ]
+
+
+filter : Filter -> Html.Html Msg
+filter f =
+    let
+        containerClass =
+            classList [ ( "inactive", not f.active ) ]
+    in
+        div
+            [ containerClass
+            , onClick (Update.ToggleFilterActive f)
+            ]
+            [ div [ class <| "circle " ++ (colorToString f.color) ] []
+            , text f.filterName
+            ]
