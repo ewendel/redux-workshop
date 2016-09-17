@@ -1,13 +1,13 @@
 module View exposing (app)
 
-import Html exposing (div, img, span, strong, text, ul, li, h1, a)
-import Html.Attributes exposing (class, src, href, classList)
+import Html exposing (..)
+import Html.Attributes as Attrs exposing (..)
 import Html.Events exposing (onClick)
 import Model exposing (Model)
 import Model.Tweet exposing (Tweet)
 import Model.Route as Route exposing (Route, routeToString)
 import Model.Filter exposing (Filter)
-import Model.MarkerColor exposing (colorToString)
+import Model.MarkerColor exposing (Color(..), colorToString, colorToFriendlyName)
 import Update exposing (Msg)
 import Util
 
@@ -48,7 +48,7 @@ viewMain model =
     let
         children =
             [ Maybe.map currentTweet model.currentTweet
-            , Just <| filterList model.filters
+            , Just <| filterContainer model
             ]
                 |> Util.collect
     in
@@ -58,7 +58,12 @@ viewMain model =
 
 viewFeed : Model -> Html.Html Msg
 viewFeed model =
-    tweetList model.tweets
+    div []
+        [ div [ class "menu" ]
+            [ filterContainer model ]
+        , div [ class "feed" ]
+            [ tweetList model.tweets ]
+        ]
 
 
 tweetList : List Tweet -> Html.Html a
@@ -126,6 +131,15 @@ link route =
             []
 
 
+filterContainer : Model -> Html.Html Msg
+filterContainer model =
+    div [ class "filter-container" ]
+        [ h2 [] [ text "Filters" ]
+        , filterList model.filters
+        , filterForm
+        ]
+
+
 filterList : List Filter -> Html.Html Msg
 filterList filters =
     div [ class "filter-container" ]
@@ -147,3 +161,42 @@ filter f =
             [ div [ class <| "circle " ++ (colorToString f.color) ] []
             , text f.filterName
             ]
+
+
+filterForm : Html.Html Msg
+filterForm =
+    Html.form [ class "filter-form" ]
+        [ h3 [] [ text "New filter" ]
+        , textInput "Name" "name"
+        , textInput "#" "hashtag"
+        , textInput "Text" "text"
+        , div [ class "input-wrapper" ]
+            [ label [ for "color" ] [ text "Marker color" ]
+            , select [ name "color" ] colorOptions
+            ]
+        , button [] [ text "Save" ]
+        ]
+
+
+textInput : String -> String -> Html.Html Msg
+textInput name id =
+    div [ class "input-wrapper" ]
+        [ label [ for id ] [ text name ]
+        , input [ type' "text", Attrs.id id ] []
+        ]
+
+
+colorOptions : List (Html.Html a)
+colorOptions =
+    let
+        opt color =
+            option [ value <| colorToString color ]
+                [ text <| colorToFriendlyName color ]
+    in
+        [ opt Yellow
+        , opt Green
+        , opt Lightblue
+        , opt Orange
+        , opt Pink
+        , opt Purple
+        ]

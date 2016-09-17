@@ -1,4 +1,4 @@
-module Model.MarkerColor exposing (Color(..), defaultColor, toIconUrl, colorToString)
+module Model.MarkerColor exposing (Color(..), defaultColor, toIconUrl, colorToString, colorToFriendlyName)
 
 import Model.GMaps exposing (IconUrl)
 
@@ -29,6 +29,19 @@ colorToString color =
         Pink -> "pink"
         Purple -> "purple"
         Red -> "red"
+
+
+colorToFriendlyName : Color -> String
+colorToFriendlyName color =
+    case color of
+        Yellow -> "Yellow"
+        Blue -> "Blue"
+        Green -> "Green"
+        Lightblue -> "Light blue"
+        Orange -> "Orange"
+        Pink -> "Pink"
+        Purple -> "Purple"
+        Red -> "Red"
 
 
 toIconUrl : Color -> IconUrl
