@@ -6,6 +6,7 @@ import Html.Events exposing (onClick)
 import Model exposing (Model)
 import Model.Tweet exposing (Tweet)
 import Model.Route as Route exposing (Route, routeToString)
+import Model.MarkerColor exposing (Color)
 import Update exposing (Msg)
 
 

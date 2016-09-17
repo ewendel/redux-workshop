@@ -1,7 +1,6 @@
 /* global gmap google */
 
 const Elm = require('./Main.elm');
-const { partition } = require('lodash');
 
 const elmDiv = document.getElementById('app');
 const mapDiv = document.getElementById('map');
@@ -20,31 +19,33 @@ const handleMarkerClick = id => {
   app.ports.markerClicked.send(id);
 };
 
-let markers = [];
+const markers = new Map();
+app.ports.changeMarkerIcon.subscribe(([id, iconUrl]) => {
+  const marker = markers.get(id);
+  if (marker) {
+    marker.setIcon(iconUrl);
+  }
+});
+
 app.ports.showMarkers.subscribe(newMarkers => {
-  const [activeMarkers, nonactiveMarkers] =
-    partition(markers, m =>
-      newMarkers.findIndex(nm => nm.id === m.id) > -1
-    );
+  newMarkers.forEach(([m, iconUrl]) => {
+    if (markers.has(m.id)) {
+      return;
+    }
+    const marker = new google.maps.Marker({
+      icon: iconUrl,
+      position: m.pos,
+      map: gmap
+    });
 
-  nonactiveMarkers.forEach(m => m.marker.setMap(null));
+    marker.addListener('click', () => handleMarkerClick(m.id));
 
-  markers = newMarkers
-    .filter(nm =>
-      markers.findIndex(m => m.id === nm.id) === -1
-    )
-    .map(m => {
-      const marker = new google.maps.Marker({
-        position: m.pos,
-        map: gmap
-      });
-
-      marker.addListener('click', () => handleMarkerClick(m.id));
-
-      return {
-        id: m.id,
-        marker
-      };
-    })
-    .concat(activeMarkers);
+    markers.set(m.id, marker);
+  });
+  for (const [id, marker] of markers) {
+    if (newMarkers.findIndex(([m]) => m.id === id) === -1) {
+      marker.setMap(null);
+      markers.delete(id);
+    }
+  }
 });
