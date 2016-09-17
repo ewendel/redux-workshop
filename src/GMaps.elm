@@ -1,16 +1,7 @@
-port module GMaps exposing (Marker, showMap, hideMap, showMarkers)
+port module GMaps exposing (showMap, hideMap, showMarkers, markerClicked)
 
-
-type alias GMPos =
-    { lat : Float
-    , lng : Float
-    }
-
-
-type alias Marker =
-    { id : Int
-    , pos : GMPos
-    }
+import Model.GMaps exposing (Marker)
+import Model.Tweet exposing (TweetId)
 
 
 port showMap : () -> Cmd a
@@ -20,3 +11,6 @@ port hideMap : () -> Cmd a
 
 
 port showMarkers : List Marker -> Cmd a
+
+
+port markerClicked : (TweetId -> msg) -> Sub msg

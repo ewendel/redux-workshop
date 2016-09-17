@@ -16,6 +16,10 @@ app.ports.hideMap.subscribe(() => {
   mapDiv.style.display = 'none';
 });
 
+const handleMarkerClick = id => {
+  app.ports.markerClicked.send(id);
+};
+
 let markers = [];
 app.ports.showMarkers.subscribe(newMarkers => {
   const [activeMarkers, nonactiveMarkers] =
@@ -29,12 +33,18 @@ app.ports.showMarkers.subscribe(newMarkers => {
     .filter(nm =>
       markers.findIndex(m => m.id === nm.id) === -1
     )
-    .map(m => ({
-      id: m.id,
-      marker: new google.maps.Marker({
+    .map(m => {
+      const marker = new google.maps.Marker({
         position: m.pos,
         map: gmap
-      })
-    }))
+      });
+
+      marker.addListener('click', () => handleMarkerClick(m.id));
+
+      return {
+        id: m.id,
+        marker
+      };
+    })
     .concat(activeMarkers);
 });

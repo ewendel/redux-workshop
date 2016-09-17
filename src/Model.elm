@@ -12,4 +12,5 @@ maxTweets =
 type alias Model =
     { tweets : List Tweet
     , route : Route
+    , currentTweet : Maybe Tweet
     }

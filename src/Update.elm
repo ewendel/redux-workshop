@@ -9,14 +9,16 @@ module Update
 import WebSocket
 import Model exposing (Model, maxTweets)
 import Model.Route exposing (Route(..), routeToString)
-import Model.Tweet exposing (Tweet, jsonDecodeTweetString, toMarker)
-import GMaps exposing (showMap, hideMap, showMarkers)
+import Model.Tweet exposing (Tweet, TweetId, jsonDecodeTweetString, toMarker)
+import GMaps exposing (showMap, hideMap, showMarkers, markerClicked)
+import Util
 
 
 init : ( Model, Cmd Msg )
 init =
     ( { tweets = []
       , route = Main
+      , currentTweet = Nothing
       }
     , showMap ()
     )
@@ -24,12 +26,16 @@ init =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    WebSocket.listen "ws://twitterws.herokuapp.com" NewTweet
+    Sub.batch
+        [ WebSocket.listen "ws://twitterws.herokuapp.com" NewTweet
+        , markerClicked MarkerClicked
+        ]
 
 
 type Msg
     = NewTweet String
     | RouteChanged Route
+    | MarkerClicked TweetId
 
 
 updateTweets : String -> Model -> ( Model, Cmd Msg )
@@ -77,6 +83,25 @@ updateRoute r model =
             )
 
 
+updateMarkerClicked : TweetId -> Model -> ( Model, Cmd Msg )
+updateMarkerClicked tId model =
+    let
+        newCurrent =
+            model.tweets
+                |> List.filter (\t -> t.id == tId)
+                |> List.head
+                |> (\ct ->
+                        if Util.maybeEquals ct model.currentTweet then
+                            Nothing
+                        else
+                            ct
+                   )
+    in
+        ( { model | currentTweet = newCurrent }
+        , Cmd.none
+        )
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -85,3 +110,6 @@ update msg model =
 
         NewTweet t ->
             updateTweets t model
+
+        MarkerClicked m ->
+            updateMarkerClicked m model |> Debug.log "Marker clicked"

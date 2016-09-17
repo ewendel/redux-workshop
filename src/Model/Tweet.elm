@@ -1,6 +1,7 @@
 module Model.Tweet
     exposing
         ( Tweet
+        , TweetId
         , TweetGeo
         , TweetPlace
         , TweetUser
@@ -11,10 +12,14 @@ module Model.Tweet
 
 import Json.Decode
 import Json.Decode.Pipeline
-import GMaps exposing (Marker)
+import Model.GMaps exposing (Marker)
+
+
+type alias TweetId = Int
+
 
 type alias Tweet =
-    { id : Int
+    { id : TweetId
     , text : String
     , geo : TweetGeo
     , place : TweetPlace

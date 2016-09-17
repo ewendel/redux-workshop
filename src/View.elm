@@ -15,15 +15,35 @@ app model =
         body =
             case model.route of
                 Route.Main ->
-                    div [] [ text "main route" ]
+                    viewMain model
 
                 Route.Feed ->
-                    tweetList model.tweets
+                    viewFeed model
     in
         div []
             [ appHeader
             , body
             ]
+
+
+viewMain : Model -> Html.Html Msg
+viewMain model =
+    let
+        children =
+            case model.currentTweet of
+                Just ct ->
+                    [ currentTweet ct ]
+
+                Nothing ->
+                    []
+    in
+        div []
+            children
+
+
+viewFeed : Model -> Html.Html Msg
+viewFeed model =
+    tweetList model.tweets
 
 
 appHeader : Html.Html Msg
@@ -68,6 +88,12 @@ tweet model =
                 [ text model.place.name ]
             ]
         ]
+
+
+currentTweet : Tweet -> Html.Html a
+currentTweet t =
+    div [ class "current-tweet" ]
+        [ tweet t ]
 
 
 tweetList : List Tweet -> Html.Html a
