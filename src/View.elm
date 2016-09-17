@@ -27,6 +27,20 @@ app model =
             ]
 
 
+appHeader : Html.Html Msg
+appHeader =
+    div [ class "app-header" ]
+        [ div []
+            [ h1 [ class "heading" ]
+                [ text "Twitter ELM STUFF" ]
+            , div [ class "menu-item" ]
+                [ link Route.Main
+                , link Route.Feed
+                ]
+            ]
+        ]
+
+
 viewMain : Model -> Html.Html Msg
 viewMain model =
     let
@@ -47,18 +61,15 @@ viewFeed model =
     tweetList model.tweets
 
 
-appHeader : Html.Html Msg
-appHeader =
-    div [ class "app-header" ]
-        [ div []
-            [ h1 [ class "heading" ]
-                [ text "Twitter ELM STUFF" ]
-            , div [ class "menu-item" ]
-                [ link Route.Main
-                , link Route.Feed
-                ]
-            ]
-        ]
+tweetList : List Tweet -> Html.Html a
+tweetList tweets =
+    let
+        tweetListItems =
+            tweets
+                |> List.map (\t -> li [] [ tweet t ])
+    in
+        ul [ class "tweetlist" ]
+            tweetListItems
 
 
 tweet : Tweet -> Html.Html a
@@ -95,17 +106,6 @@ currentTweet : Tweet -> Html.Html a
 currentTweet t =
     div [ class "current-tweet" ]
         [ tweet t ]
-
-
-tweetList : List Tweet -> Html.Html a
-tweetList tweets =
-    let
-        tweetListItems =
-            tweets
-                |> List.map (\t -> li [] [ tweet t ])
-    in
-        ul [ class "tweetlist" ]
-            tweetListItems
 
 
 link : Route -> Html.Html Msg

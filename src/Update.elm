@@ -40,44 +40,31 @@ type Msg
     | MarkerClicked TweetId
 
 
-tweetToMarker : Tweet -> Color -> ( Marker, IconUrl )
-tweetToMarker tweet color =
-    ( toMarker tweet, toIconUrl color )
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        RouteChanged r ->
+            updateRoute r model
+
+        NewTweet t ->
+            addTweet t model
+
+        MarkerClicked m ->
+            setCurrentTweet m model
 
 
-updateMarkers : Model -> Model -> Cmd Msg
-updateMarkers oldModel newModel =
-    if oldModel.tweets == newModel.tweets && oldModel.currentTweet == newModel.currentTweet then
-        Cmd.none
-    else
-        [ Just <| showMarkers (newModel.tweets |> List.map (\t -> tweetToMarker t defaultColor))
-        , getColorChangeCmd oldModel newModel
-        ]
-            |> Util.collect
-            |> Cmd.batch
+updateRoute : Route -> Model -> ( Model, Cmd Msg )
+updateRoute r model =
+    case r of
+        Main ->
+            ( { model | route = r }
+            , showMap ()
+            )
 
-
-getColorChangeCmd : Model -> Model -> Maybe (Cmd Msg)
-getColorChangeCmd oldModel newModel =
-    case ( oldModel.currentTweet, newModel.currentTweet ) of
-        ( Nothing, Nothing ) ->
-            Nothing
-
-        ( Just t1, Just t2 ) ->
-            if t1 == t2 then
-                Nothing
-            else
-                Just <|
-                    Cmd.batch
-                        [ changeMarkerIcon ( t1.id, toIconUrl defaultColor )
-                        , changeMarkerIcon ( t2.id, toIconUrl MarkerColor.Blue )
-                        ]
-
-        ( Just t, Nothing ) ->
-            Just <| changeMarkerIcon ( t.id, toIconUrl defaultColor )
-
-        ( Nothing, Just t ) ->
-            Just <| changeMarkerIcon ( t.id, toIconUrl MarkerColor.Blue )
+        Feed ->
+            ( { model | route = r }
+            , hideMap ()
+            )
 
 
 addTweet : String -> Model -> ( Model, Cmd Msg )
@@ -106,22 +93,8 @@ addTweet tweetStr model =
         )
 
 
-updateRoute : Route -> Model -> ( Model, Cmd Msg )
-updateRoute r model =
-    case r of
-        Main ->
-            ( { model | route = r }
-            , showMap ()
-            )
-
-        Feed ->
-            ( { model | route = r }
-            , hideMap ()
-            )
-
-
-setCurrentMarker : TweetId -> Model -> ( Model, Cmd Msg )
-setCurrentMarker tId model =
+setCurrentTweet : TweetId -> Model -> ( Model, Cmd Msg )
+setCurrentTweet tId model =
     let
         newCurrentTweet =
             model.tweets
@@ -142,14 +115,47 @@ setCurrentMarker tId model =
         )
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case msg of
-        RouteChanged r ->
-            updateRoute r model
+tweetToMarker : Tweet -> Color -> ( Marker, IconUrl )
+tweetToMarker tweet color =
+    ( toMarker tweet, toIconUrl color )
 
-        NewTweet t ->
-            addTweet t model
 
-        MarkerClicked m ->
-            setCurrentMarker m model
+updateMarkers : Model -> Model -> Cmd Msg
+updateMarkers oldModel newModel =
+    if oldModel.tweets == newModel.tweets && oldModel.currentTweet == newModel.currentTweet then
+        Cmd.none
+    else
+        let
+            showMarkersCmd =
+                newModel.tweets
+                    |> List.map (\t -> ( toMarker t, toIconUrl defaultColor ))
+                    |> showMarkers
+        in
+            [ Just showMarkersCmd
+            , getColorChangeCmd oldModel newModel
+            ]
+                |> Util.collect
+                |> Cmd.batch
+
+
+getColorChangeCmd : Model -> Model -> Maybe (Cmd Msg)
+getColorChangeCmd oldModel newModel =
+    case ( oldModel.currentTweet, newModel.currentTweet ) of
+        ( Nothing, Nothing ) ->
+            Nothing
+
+        ( Just t1, Nothing ) ->
+            Just <| changeMarkerIcon ( t1.id, toIconUrl defaultColor )
+
+        ( Nothing, Just t2 ) ->
+            Just <| changeMarkerIcon ( t2.id, toIconUrl MarkerColor.Blue )
+
+        ( Just t1, Just t2 ) ->
+            if t1 == t2 then
+                Nothing
+            else
+                Just <|
+                    Cmd.batch
+                        [ changeMarkerIcon ( t1.id, toIconUrl defaultColor )
+                        , changeMarkerIcon ( t2.id, toIconUrl MarkerColor.Blue )
+                        ]
