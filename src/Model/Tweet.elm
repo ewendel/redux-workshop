@@ -25,6 +25,7 @@ type alias Tweet =
     , place : TweetPlace
     , user : TweetUser
     , lang : String
+    , entities : TweetEntities
     }
 
 
@@ -53,6 +54,17 @@ type alias TweetUser =
     }
 
 
+type alias TweetEntities =
+    { hashtags : List TweetHashtag
+    }
+
+
+type alias TweetHashtag =
+    { text : String
+    , indices : List Int
+    }
+
+
 toMarker : Tweet -> Marker
 toMarker tweet =
   let
@@ -78,6 +90,7 @@ decodeTweet =
         |> Json.Decode.Pipeline.required "place" (decodeTweetPlace)
         |> Json.Decode.Pipeline.required "user" (decodeTweetUser)
         |> Json.Decode.Pipeline.required "lang" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "entities" (decodeTweetEntities)
 
 
 decodeTweetGeo : Json.Decode.Decoder TweetGeo
@@ -108,6 +121,19 @@ decodeTweetUser =
         |> Json.Decode.Pipeline.required "profile_image_url_https" (Json.Decode.string)
 
 
+decodeTweetEntities : Json.Decode.Decoder TweetEntities
+decodeTweetEntities =
+    Json.Decode.Pipeline.decode TweetEntities
+        |> Json.Decode.Pipeline.required "hashtags" (Json.Decode.list decodeTweetHashtag)
+
+
+decodeTweetHashtag : Json.Decode.Decoder TweetHashtag
+decodeTweetHashtag =
+    Json.Decode.Pipeline.decode TweetHashtag
+        |> Json.Decode.Pipeline.required "text" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "indices" (Json.Decode.list Json.Decode.int)
+
+
 exampleTweet : Tweet
 exampleTweet =
     { id = 527191454335397900
@@ -135,4 +161,7 @@ exampleTweet =
         , profile_image_url_https = "https://pbs.twimg.com/profile_images/553711083064541184/9VsY9i09.jpeg"
         }
     , lang = "en"
+    , entities =
+        { hashtags = []
+        }
     }

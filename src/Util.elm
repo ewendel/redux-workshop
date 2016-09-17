@@ -1,4 +1,4 @@
-module Util exposing (collect, maybeEquals)
+module Util exposing (collect, maybeEquals, find)
 
 
 collect : List (Maybe a) -> List a
@@ -22,3 +22,8 @@ maybeEquals aMb bMb =
 
         _ ->
             False
+
+
+find : (a -> Bool) -> List a -> Maybe a
+find f =
+    List.filter f >> List.head

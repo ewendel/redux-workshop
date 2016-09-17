@@ -12,7 +12,7 @@ import Model.Route exposing (Route(..), routeToString)
 import Model.Tweet exposing (Tweet, TweetId, jsonDecodeTweetString, toMarker)
 import Model.GMaps exposing (Marker, IconUrl)
 import Model.MarkerColor as MarkerColor exposing (Color, defaultColor, toIconUrl)
-import Model.Filter exposing (Filter)
+import Model.Filter exposing (Filter, findFilterMatch)
 import GMaps exposing (showMap, hideMap, showMarkers, changeMarkerIcon, markerClicked)
 import Util
 
@@ -24,9 +24,9 @@ init =
       , currentTweet = Nothing
       , filters =
             [ { color = MarkerColor.Yellow
-              , filterName = "Trump"
-              , text = "trump"
-              , hashtags = [ "trump" ]
+              , filterName = "The"
+              , text = "the"
+              , hashtags = [ "the" ]
               , active = True
               }
             ]
@@ -111,8 +111,7 @@ setCurrentTweet tId model =
     let
         newCurrentTweet =
             model.tweets
-                |> List.filter (\t -> t.id == tId)
-                |> List.head
+                |> Util.find (\t -> t.id == tId)
                 |> (\ct ->
                         if Util.maybeEquals ct model.currentTweet then
                             Nothing
@@ -135,43 +134,32 @@ tweetToMarker tweet color =
 
 updateMarkers : Model -> Model -> Cmd Msg
 updateMarkers oldModel newModel =
-    if oldModel.tweets == newModel.tweets && oldModel.currentTweet == newModel.currentTweet then
+    if
+        oldModel.tweets
+            == newModel.tweets
+            && oldModel.currentTweet
+            == newModel.currentTweet
+            && oldModel.filters
+            == newModel.filters
+    then
         Cmd.none
     else
         let
+            getColor tweet =
+                if Util.maybeEquals (Just tweet) newModel.currentTweet then
+                    MarkerColor.Blue
+                else
+                    tweet
+                        |> findFilterMatch newModel.filters
+                        |> Maybe.map .color
+                        |> Maybe.withDefault defaultColor
+
             showMarkersCmd =
                 newModel.tweets
-                    |> List.map (\t -> ( toMarker t, toIconUrl defaultColor ))
+                    |> List.map (\t -> ( toMarker t, toIconUrl <| getColor t ))
                     |> showMarkers
         in
-            [ Just showMarkersCmd
-            , getColorChangeCmd oldModel newModel
-            ]
-                |> Util.collect
-                |> Cmd.batch
-
-
-getColorChangeCmd : Model -> Model -> Maybe (Cmd Msg)
-getColorChangeCmd oldModel newModel =
-    case ( oldModel.currentTweet, newModel.currentTweet ) of
-        ( Nothing, Nothing ) ->
-            Nothing
-
-        ( Just t1, Nothing ) ->
-            Just <| changeMarkerIcon ( t1.id, toIconUrl defaultColor )
-
-        ( Nothing, Just t2 ) ->
-            Just <| changeMarkerIcon ( t2.id, toIconUrl MarkerColor.Blue )
-
-        ( Just t1, Just t2 ) ->
-            if t1 == t2 then
-                Nothing
-            else
-                Just <|
-                    Cmd.batch
-                        [ changeMarkerIcon ( t1.id, toIconUrl defaultColor )
-                        , changeMarkerIcon ( t2.id, toIconUrl MarkerColor.Blue )
-                        ]
+            showMarkersCmd
 
 
 toggleFilterActive : Filter -> Model -> ( Model, Cmd Msg )
