@@ -1,18 +1,27 @@
-/* global gmap google */
+/* global google */
 
 const Elm = require('./Main.elm');
 
 const elmDiv = document.getElementById('app');
-const mapDiv = document.getElementById('map');
 
 const app = Elm.Main.embed(elmDiv);
 
+let gmap;
+
 app.ports.showMap.subscribe(() => {
-  mapDiv.style.display = 'block';
+  if (!gmap) {
+    gmap = new google.maps.Map(document.getElementById('gmap'), {
+      zoom: 3,
+      center: { lat: 30.675226, lng: -35.051272 }
+    });
+  }
+  gmap.getDiv().style.display = 'block';
 });
 
 app.ports.hideMap.subscribe(() => {
-  mapDiv.style.display = 'none';
+  if (gmap) {
+    gmap.getDiv().style.display = 'none';
+  }
 });
 
 const handleMarkerClick = id => {

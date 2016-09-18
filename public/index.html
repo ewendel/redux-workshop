@@ -10,16 +10,8 @@
         <section id="app"></section>
         <footer>
         </footer>
-        <div id="map"></div>
+        <div id="gmap"></div>
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js"></script>
         <script src="public/bundle.js"></script>
-        <script>
-          function initMap() {
-            gmap = new google.maps.Map(document.getElementById('map'), {
-              zoom: 3,
-              center: { lat: 30.675226, lng: -35.051272 }
-            });
-          }
-        </script>
-        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?callback=initMap"></script>
     </body>
 </html>

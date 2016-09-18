@@ -48,12 +48,12 @@ viewMain : Model -> Html.Html Msg
 viewMain model =
     let
         children =
-            [ Maybe.map currentTweet model.currentTweet
-            , Just <| filterContainer model
+            [ Just <| div [] [ filterContainer model ]
+            , Maybe.map currentTweet model.currentTweet
             ]
                 |> Util.collect
     in
-        div []
+        div [ class "map" ]
             children
 
 
@@ -151,10 +151,8 @@ filterContainer model =
 
 filterList : List Filter -> Html.Html Msg
 filterList filters =
-    div [ class "filter-container" ]
-        [ ul [ class "filterList" ]
-            (List.map (\f -> li [] [ filter f ]) filters)
-        ]
+    ul [ class "filterList" ]
+        (List.map (\f -> li [] [ filter f ]) filters)
 
 
 filter : Filter -> Html.Html Msg
