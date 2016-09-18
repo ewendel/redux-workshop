@@ -12,27 +12,31 @@ import Model.Route exposing (Route(..), routeToString)
 import Model.Tweet exposing (Tweet, TweetId, jsonDecodeTweetString, toMarker)
 import Model.GMaps exposing (Marker, IconUrl)
 import Model.MarkerColor as MarkerColor exposing (Color, defaultColor, toIconUrl)
-import Model.Filter exposing (Filter, findFilterMatch)
+import Model.Filter exposing (Filter, findFilterMatch, emptyFilter)
 import GMaps exposing (showMap, hideMap, showMarkers, changeMarkerIcon, markerClicked)
 import Util
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { tweets = []
-      , route = Main
-      , currentTweet = Nothing
-      , filters =
-            [ { color = MarkerColor.Yellow
-              , filterName = "The"
-              , text = "the"
-              , hashtags = [ "the" ]
-              , active = True
-              }
-            ]
-      }
-    , showMap ()
-    )
+    let
+        initialModel =
+            { tweets = []
+            , route = Main
+            , currentTweet = Nothing
+            , filters =
+                [ { color = MarkerColor.Yellow
+                  , name = "The"
+                  , text = ""
+                  , hashtags = [ "lol" ]
+                  , active = True
+                  }
+                ]
+            , formVisible = False
+            , formState = emptyFilter
+            }
+    in
+        ( initialModel, showMap () )
 
 
 subscriptions : Model -> Sub Msg
@@ -48,6 +52,9 @@ type Msg
     | RouteChanged Route
     | MarkerClicked TweetId
     | ToggleFilterActive Filter
+    | ShowForm
+    | ChangeFormState Filter
+    | FormSubmit Filter
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -64,6 +71,21 @@ update msg model =
 
         ToggleFilterActive f ->
             toggleFilterActive f model
+
+        ShowForm ->
+            ( { model | formVisible = True }, Cmd.none )
+
+        ChangeFormState f ->
+            ( { model | formState = f }, Cmd.none )
+
+        FormSubmit f ->
+            ( { model
+                | filters = f :: model.filters
+                , formState = emptyFilter
+                , formVisible = False
+              }
+            , Cmd.none
+            )
 
 
 updateRoute : Route -> Model -> ( Model, Cmd Msg )

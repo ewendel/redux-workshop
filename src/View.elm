@@ -2,12 +2,13 @@ module View exposing (app)
 
 import Html exposing (..)
 import Html.Attributes as Attrs exposing (..)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onInput, onSubmit)
+import String
 import Model exposing (Model)
 import Model.Tweet exposing (Tweet)
 import Model.Route as Route exposing (Route, routeToString)
 import Model.Filter exposing (Filter)
-import Model.MarkerColor exposing (Color(..), colorToString, colorToFriendlyName)
+import Model.MarkerColor exposing (Color(..), colorToString, colorToFriendlyName, colorFromString)
 import Update exposing (Msg)
 import Util
 
@@ -133,11 +134,19 @@ link route =
 
 filterContainer : Model -> Html.Html Msg
 filterContainer model =
-    div [ class "filter-container" ]
-        [ h2 [] [ text "Filters" ]
-        , filterList model.filters
-        , filterForm
-        ]
+    let
+        formStuff =
+            if model.formVisible then
+                filterForm model
+            else
+                button [ onClick Update.ShowForm ]
+                    [ text "New filter" ]
+    in
+        div [ class "filter-container" ]
+            [ h2 [] [ text "Filters" ]
+            , filterList model.filters
+            , formStuff
+            ]
 
 
 filterList : List Filter -> Html.Html Msg
@@ -150,39 +159,62 @@ filterList filters =
 
 filter : Filter -> Html.Html Msg
 filter f =
-    let
-        containerClass =
-            classList [ ( "inactive", not f.active ) ]
-    in
-        div
-            [ containerClass
-            , onClick (Update.ToggleFilterActive f)
-            ]
-            [ div [ class <| "circle " ++ (colorToString f.color) ] []
-            , text f.filterName
-            ]
-
-
-filterForm : Html.Html Msg
-filterForm =
-    Html.form [ class "filter-form" ]
-        [ h3 [] [ text "New filter" ]
-        , textInput "Name" "name"
-        , textInput "#" "hashtag"
-        , textInput "Text" "text"
-        , div [ class "input-wrapper" ]
-            [ label [ for "color" ] [ text "Marker color" ]
-            , select [ name "color" ] colorOptions
-            ]
-        , button [] [ text "Save" ]
+    div
+        [ classList [ ( "inactive", not f.active ) ]
+        , onClick (Update.ToggleFilterActive f)
+        ]
+        [ div [ class <| "circle " ++ (colorToString f.color) ] []
+        , text f.name
         ]
 
 
-textInput : String -> String -> Html.Html Msg
-textInput name id =
+filterForm : Model -> Html.Html Msg
+filterForm model =
+    let
+        state =
+            model.formState
+
+        hashtags =
+            state.hashtags
+                |> String.concat
+
+        handleColorChange : String -> Msg
+        handleColorChange =
+            colorFromString
+                >> Maybe.withDefault Yellow
+                >> (\c -> Update.ChangeFormState { state | color = c })
+    in
+        Html.form
+            [ class "filter-form"
+            , onSubmit (Update.FormSubmit state)
+            ]
+            [ h3 [] [ text "New filter" ]
+            , textInput state.name "Name" "name" (\s -> Update.ChangeFormState { state | name = s })
+            , textInput hashtags "#" "hashtag" (\s -> Update.ChangeFormState { state | hashtags = String.split " " s })
+            , textInput state.text "Text" "text" (\s -> Update.ChangeFormState { state | text = s })
+            , div [ class "input-wrapper" ]
+                [ label [ for "color" ] [ text "Marker color" ]
+                , select
+                    [ name "color"
+                    , onInput handleColorChange
+                    ]
+                    colorOptions
+                ]
+            , button [] [ text "Save" ]
+            ]
+
+
+textInput : String -> String -> String -> (String -> Msg) -> Html.Html Msg
+textInput val name id f =
     div [ class "input-wrapper" ]
         [ label [ for id ] [ text name ]
-        , input [ type' "text", Attrs.id id ] []
+        , input
+            [ type' "text"
+            , Attrs.id id
+            , onInput f
+            , value val
+            ]
+            []
         ]
 
 
@@ -190,7 +222,8 @@ colorOptions : List (Html.Html a)
 colorOptions =
     let
         opt color =
-            option [ value <| colorToString color ]
+            option
+                [ value <| colorToString color ]
                 [ text <| colorToFriendlyName color ]
     in
         [ opt Yellow

@@ -15,7 +15,8 @@ import Json.Decode.Pipeline
 import Model.GMaps exposing (Marker)
 
 
-type alias TweetId = Int
+type alias TweetId =
+    Int
 
 
 type alias Tweet =
@@ -67,13 +68,16 @@ type alias TweetHashtag =
 
 toMarker : Tweet -> Marker
 toMarker tweet =
-  let
-    lat = tweet.geo.coordinates |> List.head |> Maybe.withDefault 0
-    lng = tweet.geo.coordinates |> List.drop 1 |> List.head |> Maybe.withDefault 0
-  in
-      { id = tweet.id
-      , pos = { lat = lat, lng = lng }
-      }
+    let
+        lat =
+            tweet.geo.coordinates |> List.head |> Maybe.withDefault 0
+
+        lng =
+            tweet.geo.coordinates |> List.drop 1 |> List.head |> Maybe.withDefault 0
+    in
+        { id = tweet.id
+        , pos = { lat = lat, lng = lng }
+        }
 
 
 jsonDecodeTweetString : String -> Result String Tweet

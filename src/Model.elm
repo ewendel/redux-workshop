@@ -15,4 +15,6 @@ type alias Model =
     , route : Route
     , currentTweet : Maybe Tweet
     , filters : List Filter
+    , formVisible : Bool
+    , formState : Filter
     }

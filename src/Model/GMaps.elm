@@ -1,7 +1,8 @@
 module Model.GMaps exposing (GMPos, Marker, IconUrl)
 
 
-type alias IconUrl = String
+type alias IconUrl =
+    String
 
 
 type alias GMPos =
