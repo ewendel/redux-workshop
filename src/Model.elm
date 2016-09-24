@@ -3,6 +3,7 @@ module Model exposing (Model, maxTweets)
 import Model.Tweet exposing (Tweet)
 import Model.Route exposing (Route)
 import Model.Filter exposing (Filter)
+import Model.ApiData exposing (ApiData)
 
 
 maxTweets : Int
@@ -14,7 +15,7 @@ type alias Model =
     { tweets : List Tweet
     , route : Route
     , currentTweet : Maybe Tweet
-    , filters : List Filter
+    , filters : ApiData (List Filter)
     , formVisible : Bool
     , formState : Filter
     }

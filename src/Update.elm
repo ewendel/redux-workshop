@@ -12,8 +12,10 @@ import Model.Route exposing (Route(..), routeToString)
 import Model.Tweet exposing (Tweet, TweetId, jsonDecodeTweetString, toMarker)
 import Model.GMaps exposing (Marker, IconUrl)
 import Model.MarkerColor as MarkerColor exposing (Color, defaultColor, toIconUrl)
-import Model.Filter exposing (Filter, findFilterMatch, emptyFilter)
+import Model.Filter exposing (Filter, findFilterMatch, emptyFilter, decodeFilters)
+import Model.ApiData as ApiData exposing (ApiData(..))
 import GMaps exposing (showMap, hideMap, showMarkers, changeMarkerIcon, markerClicked)
+import Api exposing (Msg(..))
 import Util
 
 
@@ -24,19 +26,17 @@ init =
             { tweets = []
             , route = Main
             , currentTweet = Nothing
-            , filters =
-                [ { color = MarkerColor.Yellow
-                  , name = "The"
-                  , text = ""
-                  , hashtags = [ "lol" ]
-                  , active = True
-                  }
-                ]
+            , filters = Loading
             , formVisible = False
             , formState = emptyFilter
             }
     in
-        ( initialModel, showMap () )
+        ( initialModel
+        , Cmd.batch
+            [ showMap ()
+            , Api.getFilters () |> Cmd.map ApiMsg
+            ]
+        )
 
 
 subscriptions : Model -> Sub Msg
@@ -55,6 +55,7 @@ type Msg
     | ShowForm
     | ChangeFormState Filter
     | FormSubmit Filter
+    | ApiMsg Api.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -80,12 +81,28 @@ update msg model =
 
         FormSubmit f ->
             ( { model
-                | filters = f :: model.filters
+                | filters = ApiData.map ((::) f) model.filters
                 , formState = emptyFilter
                 , formVisible = False
               }
             , Cmd.none
             )
+
+        ApiMsg msg ->
+            let
+                filters =
+                    case msg of
+                        FetchFailed err ->
+                            Failed "Error fetching filters"
+
+                        FiltersFetched fs ->
+                            Loaded fs
+            in
+                ( { model
+                    | filters = filters
+                  }
+                , Cmd.none
+                )
 
 
 updateRoute : Route -> Model -> ( Model, Cmd Msg )
@@ -172,7 +189,7 @@ updateMarkers oldModel newModel =
                     MarkerColor.Blue
                 else
                     tweet
-                        |> findFilterMatch newModel.filters
+                        |> findFilterMatch (ApiData.withDefault [] newModel.filters)
                         |> Maybe.map .color
                         |> Maybe.withDefault defaultColor
 
@@ -189,12 +206,14 @@ toggleFilterActive filter model =
     let
         updatedFilters =
             model.filters
-                |> List.map
-                    (\f ->
-                        if f == filter then
-                            { f | active = not f.active }
-                        else
-                            f
+                |> ApiData.map
+                    (List.map
+                        (\f ->
+                            if f == filter then
+                                { f | active = not f.active }
+                            else
+                                f
+                        )
                     )
     in
         ( { model | filters = updatedFilters }

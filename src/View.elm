@@ -9,6 +9,7 @@ import Model.Tweet exposing (Tweet)
 import Model.Route as Route exposing (Route, routeToString)
 import Model.Filter exposing (Filter)
 import Model.MarkerColor exposing (Color(..), colorToString, colorToFriendlyName, colorFromString)
+import Model.ApiData as ApiData
 import Update exposing (Msg)
 import Util
 
@@ -149,10 +150,21 @@ filterContainer model =
             ]
 
 
-filterList : List Filter -> Html.Html Msg
+filterList : ApiData.ApiData (List Filter) -> Html.Html Msg
 filterList filters =
-    ul [ class "filterList" ]
-        (List.map (\f -> li [] [ filter f ]) filters)
+    case filters of
+        ApiData.Loaded fs ->
+            ul [ class "filterList" ]
+                (List.map (\f -> li [] [ filter f ]) fs)
+
+        ApiData.Loading ->
+            div [] [ text "Loading..." ]
+
+        ApiData.NotLoaded ->
+            div [] []
+
+        ApiData.Failed err ->
+            div [] [ text err ]
 
 
 filter : Filter -> Html.Html Msg

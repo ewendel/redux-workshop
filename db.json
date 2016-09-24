@@ -4,7 +4,7 @@
       "color": "pink",
       "name": "Hillary",
       "text": "Hillary",
-      "hashtags": "['Hillary']",
+      "hashtags": ["Hillary"],
       "active": true
     },
     {

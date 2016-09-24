@@ -1,5 +1,17 @@
-module Model.MarkerColor exposing (Color(..), defaultColor, toIconUrl, colorToString, colorToFriendlyName, colorFromString)
+module Model.MarkerColor
+    exposing
+        ( Color(..)
+        , defaultColor
+        , toIconUrl
+        , colorToString
+        , colorToFriendlyName
+        , colorFromString
+        , decodeColor
+        , encodeColor
+        )
 
+import Json.Decode
+import Json.Encode
 import Model.GMaps exposing (IconUrl)
 import Util
 
@@ -105,3 +117,22 @@ colorFromString str =
 toIconUrl : Color -> IconUrl
 toIconUrl color =
     "http://maps.google.com/mapfiles/ms/icons/" ++ (colorToString color) ++ "-dot.png"
+
+
+decodeColor : Json.Decode.Decoder Color
+decodeColor =
+    Json.Decode.string
+        `Json.Decode.andThen`
+            (\str ->
+                case colorFromString str of
+                    Just c ->
+                        Json.Decode.succeed c
+
+                    Nothing ->
+                        Json.Decode.fail "Invalid color"
+            )
+
+
+encodeColor : Color -> Json.Encode.Value
+encodeColor =
+    colorToString >> Json.Encode.string
