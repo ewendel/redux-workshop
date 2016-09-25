@@ -1,4 +1,4 @@
-module Model.Filter exposing (Filter, findFilterMatch, emptyFilter, decodeFilters, encodeFilters)
+module Model.Filter exposing (Filter, findFilterMatch, emptyFilter, decodeFilters, decodeFilter, encodeFilters, encodeFilter)
 
 import Json.Encode
 import Json.Decode

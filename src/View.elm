@@ -10,6 +10,7 @@ import Model.Route as Route exposing (Route, routeToString)
 import Model.Filter exposing (Filter)
 import Model.MarkerColor exposing (Color(..), colorToString, colorToFriendlyName, colorFromString)
 import Model.ApiData as ApiData
+import Model.FilterForm as FilterFormState
 import Update exposing (Msg)
 import Util
 
@@ -136,12 +137,26 @@ link route =
 filterContainer : Model -> Html.Html Msg
 filterContainer model =
     let
+        addButton =
+            button [ onClick Update.ShowForm ]
+                [ text "New filter" ]
+
         formStuff =
-            if model.formVisible then
-                filterForm model
-            else
-                button [ onClick Update.ShowForm ]
-                    [ text "New filter" ]
+            case model.formState of
+                FilterFormState.Hidden ->
+                    addButton
+
+                FilterFormState.Editing f ->
+                    filterForm f
+
+                FilterFormState.Saving ->
+                    div [] [ text "Saving..." ]
+
+                FilterFormState.SavingFailed err ->
+                    div []
+                        [ text err
+                        , addButton
+                        ]
     in
         div [ class "filter-container" ]
             [ h2 [] [ text "Filters" ]
@@ -178,30 +193,27 @@ filter f =
         ]
 
 
-filterForm : Model -> Html.Html Msg
-filterForm model =
+filterForm : Filter -> Html.Html Msg
+filterForm f =
     let
-        state =
-            model.formState
-
         hashtags =
-            state.hashtags
+            f.hashtags
                 |> String.concat
 
         handleColorChange : String -> Msg
         handleColorChange =
             colorFromString
                 >> Maybe.withDefault Yellow
-                >> (\c -> Update.ChangeFormState { state | color = c })
+                >> (\c -> Update.ChangeFormState { f | color = c })
     in
         Html.form
             [ class "filter-form"
-            , onSubmit (Update.FormSubmit state)
+            , onSubmit (Update.FormSubmit f)
             ]
             [ h3 [] [ text "New filter" ]
-            , textInput state.name "Name" "name" (\s -> Update.ChangeFormState { state | name = s })
-            , textInput hashtags "#" "hashtag" (\s -> Update.ChangeFormState { state | hashtags = String.split " " s })
-            , textInput state.text "Text" "text" (\s -> Update.ChangeFormState { state | text = s })
+            , textInput f.name "Name" "name" (\s -> Update.ChangeFormState { f | name = s })
+            , textInput hashtags "#" "hashtag" (\s -> Update.ChangeFormState { f | hashtags = String.split " " s })
+            , textInput f.text "Text" "text" (\s -> Update.ChangeFormState { f | text = s })
             , div [ class "input-wrapper" ]
                 [ label [ for "color" ] [ text "Marker color" ]
                 , select

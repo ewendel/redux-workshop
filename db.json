@@ -1,13 +1,17 @@
 {
   "filters": [
     {
+      "id": 0,
       "color": "pink",
       "name": "Hillary",
       "text": "Hillary",
-      "hashtags": ["Hillary"],
+      "hashtags": [
+        "Hillary"
+      ],
       "active": true
     },
     {
+      "id": 1,
       "color": "green",
       "name": "Cool",
       "text": "cool",

@@ -14,6 +14,7 @@ import Model.GMaps exposing (Marker, IconUrl)
 import Model.MarkerColor as MarkerColor exposing (Color, defaultColor, toIconUrl)
 import Model.Filter exposing (Filter, findFilterMatch, emptyFilter, decodeFilters)
 import Model.ApiData as ApiData exposing (ApiData(..))
+import Model.FilterForm as FilterFormState
 import GMaps exposing (showMap, hideMap, showMarkers, changeMarkerIcon, markerClicked)
 import Api exposing (Msg(..))
 import Util
@@ -27,8 +28,7 @@ init =
             , route = Main
             , currentTweet = Nothing
             , filters = Loading
-            , formVisible = False
-            , formState = emptyFilter
+            , formState = FilterFormState.Hidden
             }
     in
         ( initialModel
@@ -74,35 +74,56 @@ update msg model =
             toggleFilterActive f model
 
         ShowForm ->
-            ( { model | formVisible = True }, Cmd.none )
+            ( { model | formState = FilterFormState.Editing emptyFilter }, Cmd.none )
 
         ChangeFormState f ->
-            ( { model | formState = f }, Cmd.none )
+            case model.formState of
+                FilterFormState.Editing _ ->
+                    ( { model | formState = FilterFormState.Editing f }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
 
         FormSubmit f ->
+            ( { model | formState = FilterFormState.Saving }
+            , Api.saveFilter f |> Cmd.map ApiMsg
+            )
+
+        ApiMsg subMsg ->
+            handleApiMsg subMsg model
+
+
+handleApiMsg : Api.Msg -> Model -> ( Model, Cmd Msg )
+handleApiMsg msg model =
+    case msg of
+        FetchFailed err ->
             ( { model
-                | filters = ApiData.map ((::) f) model.filters
-                , formState = emptyFilter
-                , formVisible = False
+                | filters = Failed <| "Error fetching filters (" ++ Util.httpErrorToString err ++ ")"
               }
             , Cmd.none
             )
 
-        ApiMsg msg ->
-            let
-                filters =
-                    case msg of
-                        FetchFailed err ->
-                            Failed "Error fetching filters"
+        FiltersFetched fs ->
+            ( { model
+                | filters = Loaded fs
+              }
+            , Cmd.none
+            )
 
-                        FiltersFetched fs ->
-                            Loaded fs
-            in
-                ( { model
-                    | filters = filters
-                  }
-                , Cmd.none
-                )
+        FilterSaved f ->
+            ( { model
+                | filters = ApiData.map ((::) f) model.filters
+                , formState = FilterFormState.Hidden
+              }
+            , Cmd.none
+            )
+
+        FilterSavingFailed err ->
+            ( { model
+                | formState = FilterFormState.SavingFailed <| "Error saving filter (" ++ Util.httpErrorToString err ++ ")"
+              }
+            , Cmd.none
+            )
 
 
 updateRoute : Route -> Model -> ( Model, Cmd Msg )
