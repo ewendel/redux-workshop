@@ -7,7 +7,7 @@ import AppHeader from '../components/AppHeader.jsx';
 import Feed from './Feed';
 import Map from './Map';
 
-export default function App({route, tweetCount}) {
+function App({route, tweetCount}) {
   return (
     <div>
       <AppHeader tweetCount={ tweetCount } />
