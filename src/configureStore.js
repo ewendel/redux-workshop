@@ -3,13 +3,13 @@ import thunk from 'redux-thunk';
 import rootReducer from './reducers';
 import { composeWithDevTools } from 'redux-devtools-extension';
 
-const actionsBlackList = [
+const actionsBlacklist = [
   'REMOVE THIS LINE AND UNCOMMENT THE NEXT'
   // 'TWEET_RECEIVED'
 ];
 
 const composeEnhancers = composeWithDevTools({
-    actionsBlackList: actionsBlackList
+    actionsBlacklist,
 });
 
 export default function (initialState) {
