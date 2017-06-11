@@ -16,7 +16,7 @@
     "react-google-maps": "^4.9.1",
     "react-redux": "4.4.2",
     "redux": "3.4.0",
-    "redux-devtools-extension": "^2.13.2",
+    "redux-devtools-extension": "2.13.2",
     "redux-thunk": "2.0.1",
     "reselect": "2.3.0",
     "sentiment": "1.0.6",
