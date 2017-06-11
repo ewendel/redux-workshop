@@ -363,7 +363,8 @@ Move the rendering of the tweet list to `components/TweetFeed.jsx`. The tweets s
 There should be no visible changes from before but we have the beginnings of a nicer application architecture.
 
 #### Step IV: Developer Tools
-As our application is starting to grow we want to take advantage of a really nice tool that exists for `redux` applications, namely the `redux-devtools`. This will help us during application development by allowing us to see every action that flows through our application and how they affect the state.
+As our application is starting to grow we want to take advantage of a really nice tool that exists for `redux` applications, namely the Redux Dev Tools. This will help us during application development by allowing us to see every action that flows through our application and how they affect the state.
+To enable this, first download the [Google Chrome extension] (https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd?hl=en). 
 
 We have done some of the boring setup so you don't have to. Go to `index.js` and replace your store initialization with
 ```javascript
@@ -374,24 +375,9 @@ const store = configureStore();
 `configureStore` expects a file called `reducers/index.js` to be present and exporting a valid reducer.
 * Create `reducers/index.js` that imports your tweet reducer and exports it as default
 
-While you're at it, import the `<DevTools>` component we've made (`./containers/DevTools`) and modify your `render` call so it looks like this:
+When you now open your app in Chrome, there should be a tab in the console that says "Redux". If you open the tab, there should be nice dark gray panel that keeps showing `TWEET_RECEIVED`. Pretty cool, huh? 
 
-```javascript
-import DevTools from './containers/DevTools';
-render(
-  <Provider store={ store }>
-    <div>
-      <App />
-      <DevTools />
-    </div>
-  </Provider>,
-  document.querySelector('#app')
-);
-```
-
-When you now open your app you should see a nice dark blue thingy on the right side of the screen that keeps showing `TWEET_RECEIVED`. Pretty cool, huh? You can even hide the devtools by pressing `ctrl+h` and move it by pressing `ctrl+q`!
-
-Because of the large amount of tweets coming in we won't be able to notice other actions so we want to filter these out. Go to `containers/DevTools` and do as the instructions there say.
+Because of the large amount of tweets coming in we won't be able to notice other actions so we want to filter these out. Go to `configureStore.js` and do as the instructions there say.
 Now when you open your app you will only see the `@@INIT` action in the devtools, along with the store state after this initial action.
 
 ## Task 5: Creating Your Own Router
