@@ -1,16 +1,14 @@
-import { createStore, applyMiddleware, compose } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import rootReducer from './reducers';
-import DevTools from './containers/DevTools';
+import { composeWithDevTools } from 'redux-devtools-extension';
 
-const storeEnhancer = compose(
-  applyMiddleware(
-    thunk
-  ),
-  DevTools.instrument()
-);
+const composeEnhancers = composeWithDevTools({
+  actionsBlacklist: ['TWEET_RECEIVED']
+});
 
 export default function (initialState) {
-  return createStore(rootReducer, initialState, storeEnhancer);
+  return createStore(rootReducer, initialState, composeEnhancers(
+    applyMiddleware(thunk)
+  ));
 }
-
