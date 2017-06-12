@@ -12,8 +12,6 @@
 
 6. Have loads of fun!
 
-[Slides are available here](https://github.com/ewendel/slidesets/blob/master/redux-workshop.pdf)
-
 ## Task 1: Basic Redux application flow
 
 In this section we'll set up a really simple app from scratch. You'll keep track of a single number starting at zero, incrementing it once for every click inside the browser window. We'll break this rather simple task into four steps, demonstrating the core redux concepts of a store, actions and reducers.
