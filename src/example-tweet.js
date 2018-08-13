@@ -21,7 +21,7 @@ export default {
     "screen_name": "@DanAbramov",
     "followers_count": 26587,
     "lang": "es",
-    "profile_image_url_https": "https://pbs.twimg.com/profile_images/553711083064541184/9VsY9i09.jpeg",
+    "profile_image_url_https": "https://pbs.twimg.com/profile_images/906557353549598720/oapgW_Fp_400x400.jpg",
   },
   "lang": "en"
 }
